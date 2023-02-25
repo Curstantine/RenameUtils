@@ -1,15 +1,24 @@
 import { cwd } from "process";
 import { join, resolve } from "path";
-import { fork, spawn } from "child_process";
+import { fork } from "child_process";
 import { context } from "esbuild";
 import EventSource from "eventsource";
+import { createServer } from "vite";
 
-const vite = resolve("node_modules", ".bin", "vite");
-spawn(vite, ["dev"], {
-	cwd: cwd(),
-	shell: true,
-	stdio: "inherit",
+/*
+	For some reason, vite does not resolve hoisted dependencies correctly.
+	To fix this, you need to hoist these phantom dependencies directly into the root package.json.
+	https://pnpm.io/npmrc#public-hoist-pattern
+*/
+
+const vite = await createServer({
+	root: cwd(),
+	mode: "development",
+	configFile: resolve("vite.config.ts"),
 });
+
+await vite.listen(5173);
+vite.printUrls();
 
 const backendDist = resolve("dist", "backend");
 const gluonIndex = join(backendDist, "index.js");
@@ -46,6 +55,10 @@ const startGluon = () => {
 		cwd: backendDist,
 		shell: true,
 		stdio: "inherit",
+		env: {
+			...process.env,
+			NODE_ENV: "development",
+		},
 	});
 
 	return gluon;
