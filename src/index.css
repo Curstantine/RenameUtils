@@ -1,0 +1,20 @@
+@import "@fontsource/noto-sans";
+
+:root {
+	color-scheme: light dark;
+
+	font-family: "Noto Sans", sans-serif;
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-text-size-adjust: 100%;
+}
+
+body,
+#app {
+	margin: 0;
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+}
