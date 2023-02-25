@@ -1,3 +1,10 @@
-import { open } from "@gluon-framework/gluon";
+import * as Gluon from "@gluon-framework/gluon";
 
-open("http://localhost:3000", {});
+const isDev = process.env.NODE_ENV === "development";
+const port = process.env.PORT || 5173;
+const target = isDev ? `http://localhost:${port}` : "";
+
+console.log(`Opening Gluon window at ${target}`);
+const window = await Gluon.open(target, {
+	allowHTTP: isDev,
+});

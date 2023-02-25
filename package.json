@@ -4,7 +4,8 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"dev:back": "tsc -p tsconfig.backend.json ",
+		"dev": "node ./scripts/dev.js",
+		"dev:back": "tsc -p tsconfig.backend.json && node dist/backend/index.js",
 		"dev:front": "vite",
 		"build": "tsc && vite build",
 		"preview": "vite preview"
@@ -14,13 +15,16 @@
 		"preact": "^10.11.3"
 	},
 	"devDependencies": {
+		"@babel/core": "^7.21.0",
 		"@gluon-framework/gluon": "github:gluon-framework/gluon",
 		"@preact/preset-vite": "^2.5.0",
 		"@types/node": "^18.14.1",
 		"@typescript-eslint/eslint-plugin": "^5.53.0",
 		"@typescript-eslint/parser": "^5.53.0",
 		"clsx": "^1.2.1",
+		"esbuild": "^0.17.10",
 		"eslint": "^8.34.0",
+		"eventsource": "^2.0.2",
 		"prettier": "^2.8.4",
 		"typescript": "^4.9.5",
 		"vite": "^4.1.0",

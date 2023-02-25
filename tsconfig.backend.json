@@ -1,8 +1,9 @@
 {
 	"compilerOptions": {
-		"outDir": "dist",
+		"outDir": "dist/backend",
 		"target": "ES2022",
-		"module": "CommonJS",
+		"module": "ES2022",
+		"moduleResolution": "Node",
 		"skipLibCheck": true
 	},
 	"include": ["backend"]
