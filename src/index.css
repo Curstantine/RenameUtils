@@ -1,9 +1,15 @@
-@import "@fontsource/noto-sans";
+@import "@fontsource/nunito-sans";
+@import "@fontsource/rubik";
+@import "@fontsource/rubik/500.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
 	color-scheme: light dark;
 
-	font-family: "Noto Sans", sans-serif;
+	font-family: "Nunito Sans", sans-serif;
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
@@ -17,4 +23,93 @@ body,
 	width: 100vw;
 	height: 100vh;
 	overflow: hidden;
+}
+
+#app {
+	@apply flex h-full bg-white dark:bg-black;
+}
+
+input[type="text"],
+select {
+	@apply h-8 rounded bg-transparent px-2 text-sm
+	outline outline-1 outline-neutral-300 transition-all
+	ease-in-out placeholder:text-neutral-400
+	dark:outline-neutral-700;
+}
+
+input[type="text"]:focus,
+select:focus-visible {
+	@apply outline-neutral-400 dark:outline-neutral-500;
+}
+
+input[type="checkbox"] {
+	border: 0;
+	appearance: none;
+	@apply h-4 w-4 rounded-sm border 
+	bg-transparent outline outline-1 outline-neutral-400
+	transition-all ease-in-out 
+	dark:outline-neutral-700;
+}
+
+input[type="checkbox"]:checked {
+	@apply bg-neutral-200 outline-neutral-200
+	dark:bg-neutral-700 dark:outline-neutral-700;
+}
+
+input[type="checkbox"]:checked::after {
+	@apply flex items-center justify-center text-sm text-neutral-300;
+}
+
+option {
+	appearance: none;
+	@apply bg-white dark:bg-black;
+}
+
+button {
+	@apply h-8 rounded bg-transparent px-2 text-sm
+	outline outline-1 outline-neutral-300 transition-all ease-in-out 
+	placeholder:text-neutral-400 dark:outline-neutral-700;
+}
+
+button:active {
+	@apply outline-neutral-400 dark:outline-neutral-500;
+}
+
+table {
+	@apply w-full;
+}
+
+table thead tr th {
+	@apply h-10 text-left align-middle text-sm text-neutral-400;
+}
+
+table thead tr th:first-child {
+	@apply pl-4;
+}
+
+table thead .table_elevated_header {
+	@apply absolute top-0 left-0 -z-10 h-10 w-full rounded transition-colors;
+}
+
+table.elevated thead .table_elevated_header {
+	@apply bg-neutral-50 shadow dark:bg-neutral-800;
+}
+
+table tbody tr {
+	@apply h-10 border-b border-neutral-200 dark:border-neutral-800;
+}
+
+table tbody tr td {
+	@apply text-sm text-neutral-500 dark:text-neutral-200;
+}
+
+table tbody tr td:first-child {
+	@apply pl-4;
+}
+
+.side_bar {
+	min-width: 20rem;
+	max-width: 20rem;
+	@apply flex flex-col border-r border-neutral-300 bg-neutral-50 p-4
+	dark:border-neutral-700 dark:bg-transparent;
 }
