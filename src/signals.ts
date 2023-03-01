@@ -8,3 +8,5 @@ export const matchFilters: MatchFilters = {
 	matchAll: signal<boolean>(true),
 	matchMode: signal<MatchMode>(MatchMode.FileNameOnly),
 };
+
+export const loadedFiles = signal<string[]>([]);
