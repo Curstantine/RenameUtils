@@ -12,6 +12,6 @@ module.exports = {
 		sourceType: "module",
 	},
 	plugins: ["@typescript-eslint"],
-	ignorePatterns: ["node_modules", "dist", "build"],
+	ignorePatterns: ["node_modules", "dist", "build", "src-tauri"],
 	rules: {},
 };

@@ -29,6 +29,19 @@ body,
 	@apply flex h-full bg-white dark:bg-black;
 }
 
+::-webkit-scrollbar {
+	width: 0.5rem;
+	height: 0.5rem;
+}
+
+::-webkit-scrollbar-track {
+	@apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	@apply rounded bg-neutral-300 dark:bg-neutral-700;
+}
+
 input[type="text"],
 select {
 	@apply h-8 rounded bg-transparent px-2 text-sm
@@ -76,11 +89,11 @@ button:active {
 }
 
 table {
-	@apply w-full;
+	@apply w-full whitespace-nowrap;
 }
 
 table thead tr th {
-	@apply h-10 text-left align-middle text-sm text-neutral-400;
+	@apply h-10 text-left align-middle text-sm text-neutral-400 label-sm;
 }
 
 table thead tr th:first-child {
@@ -111,5 +124,13 @@ table tbody tr td:first-child {
 	min-width: 20rem;
 	max-width: 20rem;
 	@apply flex flex-col border-r border-neutral-300 bg-neutral-50 p-4
-	dark:border-neutral-700 dark:bg-transparent;
+	transition-all dark:border-neutral-700
+	dark:bg-transparent;
+}
+
+@media (max-width: 1024px) {
+	.side_bar {
+		min-width: 15rem;
+		max-width: 15rem;
+	}
 }
