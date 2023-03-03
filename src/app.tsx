@@ -1,28 +1,26 @@
-import { useRef, useEffect, Ref } from "preact/hooks";
+import { useRef, useEffect } from "preact/hooks";
+import { selectFiles } from "./utils";
 import { MatchMode, matchModes } from "./constants";
-import { matchFilters } from "./signals";
-import { promptSelectFiles } from "./utils";
-import type { FileStruct } from "./types";
+import { loadedFiles, matchFilters } from "./signals";
 
 export function App() {
-	const pageRef = useRef<HTMLDivElement | null>(null);
-	const files: FileStruct[] = [];
-
 	return (
 		<>
 			<SideBar />
-			{files.length > 0 && (
-				<div class="flex w-full flex-col overflow-y-auto px-4 py-2" ref={pageRef}>
-					<FileTable pageRef={pageRef} files={files} />
+			{loadedFiles.value.length > 0 ? (
+				<div class="flex w-full flex-col overflow-y-auto overflow-x-hidden px-4 pt-2 pb-4">
+					<FileTable />
+					<div class="mt-4 flex justify-end">
+						<button onClick={selectFiles}>Add More Files</button>
+					</div>
 				</div>
-			)}
-			{files.length === 0 && (
+			) : (
 				<div class="flex w-full flex-col items-center justify-center">
 					<span class="display-lg">No Files Found</span>
 					<span class="label-md">
 						Drag & drop files here, or add from the picker below.
 					</span>
-					<button class="mt-4" onClick={promptSelectFiles}>
+					<button class="mt-4" onClick={selectFiles}>
 						Add Files
 					</button>
 				</div>
@@ -89,57 +87,57 @@ export function SideBar() {
 	);
 }
 
-type FileTableProps = {
-	pageRef: Ref<HTMLDivElement>;
-	files: FileStruct[];
-};
-
-function FileTable({ pageRef, files }: FileTableProps) {
+function FileTable() {
+	const wrapperRef = useRef<HTMLDivElement | null>(null);
 	const tableRef = useRef<HTMLTableElement | null>(null);
 
 	useEffect(() => {
+		if (!wrapperRef.current || !tableRef.current) return;
+
+		// We already know that the table header exists.
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const tableHeaderHeight = tableRef.current.querySelector("thead")!.clientHeight * 0.75;
+
 		const onTablePageScroll = (e: Event) => {
-			const tableHeader = tableRef.current;
-			if (!tableHeader) return;
+			const table = tableRef.current;
+			if (!table) return;
 
 			const target = e.target as HTMLDivElement;
-			const hasElevate = tableHeader.classList.contains("elevated");
+			const hasElevate = table.classList.contains("elevated");
 
-			if (target.scrollTop > 50 && !hasElevate) {
-				tableHeader.classList.add("elevated");
-			} else if (target.scrollTop <= 50 && hasElevate) {
-				tableHeader.classList.remove("elevated");
+			if (target.scrollTop > tableHeaderHeight && !hasElevate) {
+				table.classList.add("elevated");
+			} else if (target.scrollTop <= tableHeaderHeight && hasElevate) {
+				table.classList.remove("elevated");
 			}
 		};
 
-		if (pageRef.current) {
-			pageRef.current.onscroll = onTablePageScroll;
-		}
+		wrapperRef.current.onscroll = onTablePageScroll;
 
 		return () => {
-			if (pageRef.current) {
-				pageRef.current.onscroll = null;
+			if (wrapperRef.current) {
+				wrapperRef.current.onscroll = null;
 			}
 		};
 	}, []);
 
 	return (
-		<table ref={tableRef}>
-			<thead class="sticky top-0">
-				<tr class="bg-neutral-60 z-10">
-					<th class="label-sm">File Name</th>
-					<th class="label-sm">Matched</th>
-				</tr>
-				<div class="table_elevated_header" />
-			</thead>
-			<tbody>
-				{files.map((_, i) => (
-					<tr>
-						<td>file{i}.txt</td>
-						<td>Yes</td>
+		<div class="overflow-x-auto overflow-y-visible" ref={wrapperRef}>
+			<table ref={tableRef}>
+				<thead class="sticky top-0">
+					<tr class="bg-neutral-60 z-10">
+						<th>File Name</th>
 					</tr>
-				))}
-			</tbody>
-		</table>
+					<div class="table_elevated_header" />
+				</thead>
+				<tbody>
+					{loadedFiles.value.map(({ name, path }) => (
+						<tr key={path}>
+							<td>{name}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
 	);
 }
