@@ -35,6 +35,7 @@ module.exports = {
 	theme: {
 		fontFamily: {
 			sans: ["Nunito Sans", "sans-serif"],
+			fancy: ["Rubik", "sans-serif"],
 		},
 		colors: {
 			transparent: "transparent",
@@ -42,6 +43,8 @@ module.exports = {
 			neutral: colors.neutral,
 			white: colors.white,
 			black: colors.black,
+			red: colors.red,
+			yellow: colors.amber,
 		},
 	},
 	plugins: [labelPlugin, displayPlugin],

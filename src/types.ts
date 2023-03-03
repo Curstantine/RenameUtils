@@ -13,3 +13,15 @@ export interface FileStruct {
 	path: string;
 	extension: string;
 }
+
+export interface Announcement {
+	message: string;
+	sub?: string;
+	type: "success" | "error" | "warning";
+	delay?: number;
+}
+
+export interface LocalError {
+	message: string;
+	context: string;
+}

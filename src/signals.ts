@@ -1,6 +1,6 @@
 import { signal } from "@preact/signals";
 import { MatchMode } from "./constants";
-import type { FileStruct, MatchFilters } from "./types";
+import type { Announcement, FileStruct, MatchFilters } from "./types";
 
 export const matchFilters: MatchFilters = {
 	matchString: signal<string>(""),
@@ -10,3 +10,5 @@ export const matchFilters: MatchFilters = {
 };
 
 export const loadedFiles = signal<FileStruct[]>([]);
+
+export const announcement = signal<Announcement | null>(null);

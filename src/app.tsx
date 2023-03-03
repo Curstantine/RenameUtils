@@ -1,7 +1,8 @@
-import { useRef, useEffect } from "preact/hooks";
+import clsx from "clsx";
+import { useRef, useEffect, useState } from "preact/hooks";
 import { selectFiles } from "./utils";
 import { MatchMode, matchModes } from "./constants";
-import { loadedFiles, matchFilters } from "./signals";
+import { announcement, loadedFiles, matchFilters } from "./signals";
 
 export function App() {
 	return (
@@ -25,6 +26,7 @@ export function App() {
 					</button>
 				</div>
 			)}
+			<Snackbar />
 		</>
 	);
 }
@@ -138,6 +140,45 @@ function FileTable() {
 					))}
 				</tbody>
 			</table>
+		</div>
+	);
+}
+
+function Snackbar() {
+	const [show, setShow] = useState(false);
+	const announce = announcement.value;
+
+	useEffect(() => {
+		announcement.subscribe((value) => {
+			if (value) {
+				setShow(true);
+				setTimeout(() => {
+					setShow(false);
+					announcement.value = null;
+				}, value.delay ?? 5000);
+			}
+		});
+	}, []);
+
+	return (
+		<div
+			class={clsx(
+				"absolute bottom-4 left-4 flex h-12 min-w-[22rem] max-w-sm -translate-x-[110%] items-center rounded border-l-4 bg-neutral-100 px-2 shadow-lg transition-transform dark:bg-neutral-900",
+				{
+					"border-l-red-500": announce?.type === "error",
+					"border-l-yellow-500": announce?.type === "warning",
+					"translate-x-0": show,
+				}
+			)}
+		>
+			<div class="flex flex-col">
+				<span class="font-fancy text-neutral-700 label-sm dark:text-neutral-300">
+					{announce?.message}
+				</span>
+				<span class={clsx("text-xs text-neutral-500", { hidden: !announce?.sub })}>
+					{announce?.sub}
+				</span>
+			</div>
 		</div>
 	);
 }

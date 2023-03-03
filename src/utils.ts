@@ -1,10 +1,22 @@
 import { invoke } from "@tauri-apps/api";
-import { loadedFiles } from "./signals";
-import { FileStruct } from "./types";
+import { announcement, loadedFiles } from "./signals";
+import { FileStruct, LocalError } from "./types";
 
 export const selectFiles = async () => {
-	const selected: FileStruct[] = await invoke("select_files");
+	try {
+		const selected: FileStruct[] = await invoke("select_files");
 
-	const x = selected.filter((file) => !loadedFiles.value.includes(file));
-	loadedFiles.value = [...loadedFiles.value, ...x];
+		const oldFilePaths = loadedFiles.value.map((file) => file.path);
+		const x = selected.filter((file) => !oldFilePaths.includes(file.path));
+
+		loadedFiles.value = [...loadedFiles.value, ...x];
+	} catch (e) {
+		const err = e as LocalError;
+
+		announcement.value = {
+			message: err.message,
+			sub: err.context,
+			type: "error",
+		};
+	}
 };
