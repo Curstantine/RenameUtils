@@ -23,5 +23,5 @@ export interface Announcement {
 
 export interface LocalError {
 	message: string;
-	context: string;
+	context: string | null;
 }

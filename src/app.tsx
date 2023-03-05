@@ -1,31 +1,16 @@
 import clsx from "clsx";
 import { useRef, useEffect, useState } from "preact/hooks";
-import { selectFiles } from "./utils";
+import { listen } from "@tauri-apps/api/event";
+import type { FileStruct } from "./types";
 import { MatchMode, matchModes } from "./constants";
+import { getFileInfo, loadFilesToSignal, selectFiles } from "./utils";
 import { announcement, loadedFiles, matchFilters } from "./signals";
 
 export function App() {
 	return (
 		<>
 			<SideBar />
-			{loadedFiles.value.length > 0 ? (
-				<div class="flex w-full flex-col overflow-y-auto overflow-x-hidden px-4 pt-2 pb-4">
-					<FileTable />
-					<div class="mt-4 flex justify-end">
-						<button onClick={selectFiles}>Add More Files</button>
-					</div>
-				</div>
-			) : (
-				<div class="flex w-full flex-col items-center justify-center">
-					<span class="display-lg">No Files Found</span>
-					<span class="label-md">
-						Drag & drop files here, or add from the picker below.
-					</span>
-					<button class="mt-4" onClick={selectFiles}>
-						Add Files
-					</button>
-				</div>
-			)}
+			<Content />
 			<Snackbar />
 		</>
 	);
@@ -89,9 +74,59 @@ export function SideBar() {
 	);
 }
 
+function Content() {
+	const [isLoading, setLoadingStatus] = useState(true);
+
+	useEffect(() => {
+		const dragListener = (async () => {
+			const x = await listen<string[]>("tauri://file-drop", async (event) => {
+				const files = await Promise.all(event.payload.map((path) => getFileInfo(path)));
+				loadFilesToSignal(files.filter((x) => x !== null) as FileStruct[]);
+			});
+
+			setLoadingStatus(false);
+			return x;
+		})();
+
+		return () => {
+			dragListener.then((dispose) => dispose());
+		};
+	}, []);
+
+	if (isLoading) {
+		return (
+			<div class="flex w-full flex-col items-center justify-center">
+				<Spinner />
+			</div>
+		);
+	}
+
+	if (loadedFiles.value.length === 0) {
+		return (
+			<div class="flex w-full flex-col items-center justify-center">
+				<span class="display-lg">No Files Found</span>
+				<span class="label-md">Drag & drop files here, or add from the picker below.</span>
+				<button class="mt-4" onClick={selectFiles}>
+					Add Files
+				</button>
+			</div>
+		);
+	}
+
+	return (
+		<div class="flex w-full flex-col overflow-y-auto overflow-x-hidden px-4 pt-2 pb-4">
+			<FileTable />
+			<div class="mt-4 flex justify-end gap-2">
+				<button onClick={() => (loadedFiles.value = [])}>Clear All</button>
+				<button onClick={selectFiles}>Add More Files</button>
+			</div>
+		</div>
+	);
+}
+
 function FileTable() {
-	const wrapperRef = useRef<HTMLDivElement | null>(null);
-	const tableRef = useRef<HTMLTableElement | null>(null);
+	const wrapperRef = useRef<HTMLDivElement>(null);
+	const tableRef = useRef<HTMLTableElement>(null);
 
 	useEffect(() => {
 		if (!wrapperRef.current || !tableRef.current) return;
@@ -100,7 +135,7 @@ function FileTable() {
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const tableHeaderHeight = tableRef.current.querySelector("thead")!.clientHeight * 0.75;
 
-		const onTablePageScroll = (e: Event) => {
+		wrapperRef.current.onscroll = (e: Event) => {
 			const table = tableRef.current;
 			if (!table) return;
 
@@ -113,8 +148,6 @@ function FileTable() {
 				table.classList.remove("elevated");
 			}
 		};
-
-		wrapperRef.current.onscroll = onTablePageScroll;
 
 		return () => {
 			if (wrapperRef.current) {
@@ -180,5 +213,21 @@ function Snackbar() {
 				</span>
 			</div>
 		</div>
+	);
+}
+
+function Spinner() {
+	return (
+		<svg class="h-8 w-8 animate-spin stroke-2" viewBox="0 0 16 16">
+			<circle
+				class="stroke-neutral-100"
+				style={{ strokeLinecap: "round" }}
+				cx="50%"
+				cy="50%"
+				r="7"
+				stroke-dasharray="50"
+				stroke-dashoffset="75"
+			/>
+		</svg>
 	);
 }

@@ -6,11 +6,14 @@
 mod error;
 mod files;
 
-use crate::files::select_files;
+pub type Result<T> = std::result::Result<T, error::Error>;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![select_files])
+        .invoke_handler(tauri::generate_handler![
+            files::select_files,
+            files::get_file_info
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
