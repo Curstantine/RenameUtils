@@ -14,6 +14,11 @@ export interface FileStruct {
 	extension: string;
 }
 
+export interface FileMatch {
+	file: FileStruct;
+	matches: boolean;
+}
+
 export interface Announcement {
 	message: string;
 	sub?: string;

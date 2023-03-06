@@ -1,10 +1,11 @@
 import clsx from "clsx";
 import { useRef, useEffect, useState } from "preact/hooks";
 import { listen } from "@tauri-apps/api/event";
-import type { FileStruct } from "./types";
+import { FileMatch, FileStruct } from "./types";
 import { MatchMode, matchModes } from "./constants";
 import { getFileInfo, loadFilesToSignal, selectFiles } from "./utils";
 import { announcement, loadedFiles, matchFilters } from "./signals";
+import { Signal, useSignal } from "@preact/signals";
 
 export function App() {
 	return (
@@ -76,6 +77,14 @@ export function SideBar() {
 
 function Content() {
 	const [isLoading, setLoadingStatus] = useState(true);
+	const matches = useSignal<FileMatch[]>([]);
+
+	useEffect(() => {}, [
+		matchFilters.regexEnabled,
+		matchFilters.matchAll,
+		matchFilters.matchMode,
+		matchFilters.matchString,
+	]);
 
 	useEffect(() => {
 		const dragListener = (async () => {
@@ -88,8 +97,18 @@ function Content() {
 			return x;
 		})();
 
+		const unsubscribe = loadedFiles.subscribe((files) => {
+			if (files.length === 0) return (matches.value = []);
+			const filtered = files
+				.filter((x) => matches.value.every((y) => x.path !== y.file.path))
+				.map((file) => ({ file, matches: false }));
+
+			matches.value = matches.value.concat(filtered);
+		});
+
 		return () => {
 			dragListener.then((dispose) => dispose());
+			unsubscribe();
 		};
 	}, []);
 
@@ -115,7 +134,7 @@ function Content() {
 
 	return (
 		<div class="flex w-full flex-col overflow-y-auto overflow-x-hidden px-4 pt-2 pb-4">
-			<FileTable />
+			<FileTable matches={matches} />
 			<div class="mt-4 flex justify-end gap-2">
 				<button onClick={() => (loadedFiles.value = [])}>Clear All</button>
 				<button onClick={selectFiles}>Add More Files</button>
@@ -124,7 +143,7 @@ function Content() {
 	);
 }
 
-function FileTable() {
+function FileTable({ matches }: { matches: Signal<FileMatch[]> }) {
 	const wrapperRef = useRef<HTMLDivElement>(null);
 	const tableRef = useRef<HTMLTableElement>(null);
 
@@ -161,13 +180,13 @@ function FileTable() {
 			<table ref={tableRef}>
 				<thead class="sticky top-0">
 					<tr class="bg-neutral-60 z-10">
-						<th>File Name</th>
+						<th>Current</th>
 					</tr>
 					<div class="table_elevated_header" />
 				</thead>
 				<tbody>
-					{loadedFiles.value.map(({ name, path }) => (
-						<tr key={path}>
+					{matches.value.map(({ file: { name, path }, matches }) => (
+						<tr key={path} class={clsx({ "opacity-75": !matches })}>
 							<td>{name}</td>
 						</tr>
 					))}
@@ -182,7 +201,7 @@ function Snackbar() {
 	const announce = announcement.value;
 
 	useEffect(() => {
-		announcement.subscribe((value) => {
+		const unsubscribe = announcement.subscribe((value) => {
 			if (value) {
 				setShow(true);
 				setTimeout(() => {
@@ -191,6 +210,10 @@ function Snackbar() {
 				}, value.delay ?? 5000);
 			}
 		});
+
+		return () => {
+			unsubscribe();
+		};
 	}, []);
 
 	return (
